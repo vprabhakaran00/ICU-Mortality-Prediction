@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Result</title>
+    <style>
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background-color: #F0F0F0;;
+            padding: 0;
+        }
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #doughnutChart {
+            display: block;
+            margin: 0 auto;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+
+
+        a {
+            display: block;
+            text-align: center;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #0056b3;
+        }
+
+        .grid-container {
+            display: grid; /* Use CSS Grid for layout */
+            grid-template-columns: repeat(4, 1fr); /* Create four equally sized columns */
+            padding-top: 5%;
+        }
+
+        .grid-item {
+            padding: 10px;
+        }
+
+        .navbar-brand{
+            padding-right: 40%;
+        }
+
+        .pred-outcome-text{
+            font-size: 4vw;
+            color: midnightblue;
+        }
+
+        .title-heading{
+            font-size: 6vw;
+            padding-top: 5%;
+        }
+
+        .title-heading-2{
+            font-size: 4vw;
+            padding-top: 5%;
+        }
+
+        .chart-title{
+            font-size: 1.35vw;
+            color: #de860b;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-md navbar-light bg-light">
+            <div class="container">
+                <!-- Brand/Logo -->
+                <a class="navbar-brand" href="/">XGBoost Hospital Mortality Calculator</a>
+
+                <!-- Toggle Button for Mobile -->
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Navbar Links -->
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="/">Data Entry</a>
+                        </li>
+                        <li class="nav-item active">
+                            <a class="nav-link" href="/result/">Results</a>
+                        </li>
+                        <li class="nav-item active">
+                            <a class="nav-link" href="/admin/">Admin</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    {% if result %}
+        <br>
+        <!-- Add the canvas element to render the outcome doughnut chart -->
+        <p class = "text-center title-heading">PREDICTION RESULT</p>
+        <p class = "text-center pred-outcome-text">patient will {{result}} with a probability of {{result_prob}}% </p>
+    {% endif %}
+    <p class = "text-center title-heading-2">VISUALIZATION - HISTORICAL DATA</p>
+
+    <div>
+        <p class="text-center chart-title"> Previous Outcomes </p>
+        <canvas id="doughnutChart" width="400" height="400"></canvas>
+    </div>
+
+
+    <div class="grid-container">
+        <div class="grid-item">
+            <p class="text-center chart-title"> Sepsis Results </p>
+            <canvas id="sepsisChart"></canvas>
+        </div>
+
+        <div class="grid-item">
+            <p class="text-center chart-title"> Any Organ Failure Results </p>
+            <canvas id="any_org_failChart"></canvas>
+        </div>
+
+        <div class="grid-item">
+            <p class="text-center chart-title"> Cardiovascular Dysfunction Results </p>
+            <canvas id="cardio_dysChart"></canvas>
+        </div>
+
+        <div class="grid-item">
+            <p class="text-center chart-title"> Respiratory Dysfunction Results </p>
+            <canvas id="resp_dysChart"></canvas>
+        </div>
+    </div>
+
+
+    <script>
+        // *********** OUTCOME CHART *************
+        // Retrieve the alive_percentage and dead_percentage from the context
+        const alivePercentage = {{ alive_percentage }};
+        const deadPercentage = {{ dead_percentage }};
+        // Create the data for the doughnut chart
+        const data = {
+            labels: ['Alive (%)', 'Dead (%)'],
+            datasets: [{
+                data: [alivePercentage, deadPercentage],
+                backgroundColor: [
+                    'rgb(243, 243, 243)',
+                    'rgb(247, 186, 173)'
+                ]
+            }]
+        };
+        // Get the canvas element
+        const doughnutChart = document.getElementById('doughnutChart').getContext('2d');
+        // Create the doughnut chart
+        new Chart(doughnutChart, {
+            type: 'doughnut',
+            data: data,
+        });
+
+        // *********** SEPSIS CHART *************
+        const sepsis_percentage = {{ sepsis_percentage }};
+        // Create the data for the doughnut chart
+        const sepsis_data = {
+            labels: ['Sepsis (%)', 'Non-Sepsis (%)'],
+            datasets: [{
+                data: [sepsis_percentage, (100 - sepsis_percentage)],
+                backgroundColor: [
+                    'rgb(243, 243, 243)',
+                    'rgb(153, 204, 255)'
+                ]
+            }]
+        };
+        // Get the canvas element
+        const sepsisChart = document.getElementById('sepsisChart').getContext('2d');
+        // Create the doughnut chart
+        new Chart(sepsisChart, {
+            type: 'doughnut',
+            data: sepsis_data,
+        });
+
+        // *********** Organ Failure CHART *************
+        const any_org_fail_percentage = {{ any_org_fail_percentage }};
+        // Create the data for the doughnut chart
+        const organ_data = {
+            labels: ['Organ Failure(%)', 'No Organ Failure(%)'],
+            datasets: [{
+                data: [any_org_fail_percentage, (100 - any_org_fail_percentage)],
+                backgroundColor: [
+                    'rgb(243, 243, 243)',
+                    'rgb(153, 204, 255)'
+                ]
+            }]
+        };
+        // Get the canvas element
+        const any_organ_failChart = document.getElementById('any_org_failChart').getContext('2d');
+        // Create the doughnut chart
+        new Chart(any_organ_failChart, {
+            type: 'doughnut',
+            data: organ_data,
+        });
+
+        // *********** CARDIO CHART *************
+        const cardio_dys_percentage = {{ cardio_dys_percentage }};
+        // Create the data for the doughnut chart
+        const cardio_data = {
+            labels: ['Cardiovascular Dysfunction(%)', 'No Cardiovascular Dysfunction(%)'],
+            datasets: [{
+                data: [cardio_dys_percentage, (100 - cardio_dys_percentage)],
+                backgroundColor: [
+                    'rgb(243, 243, 243)',
+                    'rgb(153, 204, 255)'
+                ]
+            }]
+        };
+        // Get the canvas element
+        const cardio_dysChart = document.getElementById('cardio_dysChart').getContext('2d');
+        // Create the doughnut chart
+        new Chart(cardio_dysChart, {
+            type: 'doughnut',
+            data: cardio_data,
+        });
+
+
+        // *********** Respiratory Dysfunction CHART *************
+        const resp_dys_percentage = {{ resp_dys_percentage }};
+        // Create the data for the doughnut chart
+        const resp_data = {
+            labels: ['Respiratory Dysfunction (%)', 'Non Respiratory Dysfunction (%)'],
+            datasets: [{
+                data: [resp_dys_percentage, (100 - resp_dys_percentage)],
+                backgroundColor: [
+                    'rgb(243, 243, 243)',
+                    'rgb(153, 204, 255)'
+                ]
+            }]
+        };
+        // Get the canvas element
+        const resp_dysChart = document.getElementById('resp_dysChart').getContext('2d');
+        // Create the doughnut chart
+        new Chart(resp_dysChart, {
+            type: 'doughnut',
+            data: resp_data,
+        });
+
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+</body>
+</html>
+
+

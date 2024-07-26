@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Mortality Prediction</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom font for the title */
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .title {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        /* Custom style for input range box */
+        .input-range {
+            font-size: 0.8rem;
+            font-style: italic;
+            border: 1px solid #dfcbc7;
+            color: #fff;
+            background-color: #8b0000;
+            width: 200px;
+            padding-left: 10px;
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+        }
+
+        /* Custom style for input boxes */
+        .input-box {
+            max-width: 600px;
+            border: 1px solid #dee2e6;
+            border-radius: 0.8rem;
+            padding: 10px 0px 10px 0px;
+            margin-bottom: 20px;
+            color: #36454f;
+            background-color: #dfcbc7;
+        }
+
+        /* Custom style for input field */
+            .input-box input[type="number"] {
+            width: 200px;
+            border: 1px solid #dfcbc7;
+            border-bottom-left-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+            margin-bottom: 15px;
+        }
+
+        /* Custom style for the valid range warning message*/
+        .valid-error {
+            color: #8b0000;
+            list-style: none;
+        }
+
+        /* Custom style for medical history subtext */
+        .medical-history-subtext {
+            font-size: 0.8rem;
+            font-style: italic;
+            color: #8b0000;
+            margin-bottom: 5px;
+        }
+
+        /* Custom style for the Submit button */
+        .submit-btn {
+            display: block;
+            width: 30%;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+            color: #fff;
+            background-color: #8b0000;
+            border: none;
+            border-radius: 0.8rem; /* Rounded edges */
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background-color: #b22222;
+        }
+
+        /* Custom style to align form elements */
+        .form-group.row {
+            display: flex;
+            align-items: baseline;
+            justify-content: flex-end;
+        }
+
+        .form-group.row label {
+            flex: 0 0 300px; /* Adjust the label width as needed */
+            text-align: left;
+            padding-left: 20px;
+        }
+
+        .form-group.row div {
+            flex: 1;
+            text-align: left;
+        }
+
+        .navbar-brand{
+            padding-right: 40%;
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+    <header>
+        <nav class="navbar navbar-expand-md navbar-light bg-light">
+            <div class="container">
+                <!-- Brand/Logo -->
+                <a class="navbar-brand" href="/">XGBoost Hospital Mortality Calculator</a>
+
+                <!-- Toggle Button for Mobile -->
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Navbar Links -->
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="">Data Entry</a>
+                        </li>
+                        <li class="nav-item active">
+                            <a class="nav-link" href="/result/">Results</a>
+                        </li>
+                        <li class="nav-item active">
+                            <a class="nav-link" href="/admin/">Admin</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1 class="text-center mb-4 title">Hospital Mortality Prediction</h1>
+
+                <form method="post" action="{% url 'result' %}">
+                    {% csrf_token %}
+                    <div class="form-group row input-box">
+                        <label class="col-form-label" style="font-weight: 600">Age</label>
+                        <div>
+                            <div class="input-range">Valid range: 18 - 90</div>
+                            {{ form.age }}
+                            <span>years</span>
+                            <p class="valid-error">{{ form.age.errors.as_text }}</p>
+                        </div>
+
+                        <label class="col-form-label" style="font-weight: 600">Mean Heart Rate</label>
+                        <div>
+                            <div class="input-range">Valid range: 38 - 155</div>
+                            {{ form.mean_hr }}
+                            <span>bpm</span>
+                            <p class="valid-error">{{ form.mean_hr.errors.as_text }}</p>
+                        </div>
+
+                        <label class="col-form-label" style="font-weight: 600">Mean Systolic Pressure</label>
+                        <div>
+                            <div class="input-range">Valid range: 29 - 216</div>
+                            {{ form.mean_sys_pr }}
+                            <span>mmHg</span>
+                            <p class="valid-error">{{ form.mean_sys_pr.errors.as_text }}</p>
+                        </div>
+
+                        <label class="col-form-label" style="font-weight: 600">Mean Temperature</label>
+                        <div>
+                            <div class="input-range">Valid range: 30 - 41</div>
+                            {{ form.mean_temp }}
+                            <span>°C</span>
+                            <p class="valid-error">{{ form.mean_temp.errors.as_text }}</p>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="medical-history-label" style="font-weight: 600">Medical History</div>
+                            <div class="medical-history-subtext">Indicate whether patient has been diagnosed with any of the following conditions</div>
+
+                            <div class="form-row">
+                                <div class="form-check col-md-6">
+                                    <label class="form-check-label">{{ form.sepsis }}
+                                        Sepsis
+                                    </label>
+                                </div>
+                                <div class="form-check col-md-6">
+                                    <label class="form-check-label">{{ form.any_org_fail }}
+                                        Any Organ Failure
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-check col-md-6">
+                                    <label class="form-check-label">{{ form.cardio_dys }}
+                                        Cardiovascular Dysfunction
+                                    </label>
+                                </div>
+                                <div class="form-check col-md-6">
+                                    <label class="form-check-label">{{ form.resp_dys }}
+                                        Respiratory Dysfunction
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                     <div class="form-group row justify-content-center">
+                        <input type="submit" value="Submit" class="submit-btn col-md-6">
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
